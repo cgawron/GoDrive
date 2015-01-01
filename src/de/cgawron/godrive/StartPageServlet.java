@@ -53,7 +53,7 @@ public class StartPageServlet extends GoDriveServlet {
 		logger.info("StartPageServlet: " + reqUrl);
 
 		// handle OAuth2 callback
-		if (handleCallbackIfRequired(req, resp))
+		if (false && handleCallbackIfRequired(req, resp))
 			return;
 
 		// Deserialize the state in order to specify some values to the DrEdit
@@ -61,7 +61,7 @@ public class StartPageServlet extends GoDriveServlet {
 		String stateParam = req.getParameter("state");
 
 		// Making sure that we have user credentials
-		if (loginIfRequired(req, resp, stateParam))
+		if (false && loginIfRequired(req, resp, stateParam))
 			return;
 
 		if (stateParam != null) {
