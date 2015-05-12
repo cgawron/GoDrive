@@ -29,7 +29,7 @@ public class UpdateService {
 	long submitted = 0;
 	long lastSaved = 0;
 
-	public void submitUpdateRequest(Drive service, File file, GameTree gameTree)
+	public void submitUpdateRequest(final Drive service, final File file, GameTree gameTree)
 	{
 		synchronized (UpdateService.class) {
 			final GameTree gt = gameTree;
