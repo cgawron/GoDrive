@@ -1,0 +1,155 @@
+<div class="container-fluid">
+	<div id="doc-bar" class="row-fluid">
+		<span class="span4">
+			<h3 ng-show="doc.info.editable" class="doc-title" data-toggle="modal"
+				href="#rename-dialog">{{doc.info.title}}</h3>
+			<h3 ng-hide="doc.info.editable" class="doc-title">{{doc.info.title}}</h3>
+			<star value="doc.info.labels.starred" click="editor.dirty(true)"></star>
+		</span> <span class="span4">{{editor.state() | saveStateFormatter }}</span> <span
+			class="span4" ng-controller="ShareCtrl"><a
+			class="btn pull-right" href click="share"> Share</a></span>
+	</div>
+	<div id="content">
+		<div id="goban-div">
+
+			<div id="goban" ng-controller="GobanCtrl">
+			    
+				<h3>{{Game.get('game.name')}}</h3>
+				
+				<div class="ctrlgroup-wrapper">
+				
+				    <div class="dropdown ctrlgroup ctrlgroup-left">
+				      <a class="btn btn-default" title="Menu" data-toggle="dropdown"><span
+						class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></a>
+				      <ul class="dropdown-menu" role="menu">
+				      <li class="" role="presentation" title="Display coordinates"><a ng-href="" ng-click="Player.board.toggleCoordinates()">Toggle coordinates</a></li>
+				      <li class="dropdown-submenu">
+			    	  	<a class="dropdown-toggle" data-toggle="dropdown">Edit Mode</a>
+    					<ul class="dropdown-menu">
+    						<li><a ng-click="Player.switchMode('replay')">Replay</a></li>
+    						<li><a ng-click="Player.switchMode('edit')">Edit</a></li>
+    						<li><a ng-click="Player.switchMode('solve')">Solve</a></li>
+				        </ul>
+				      </li>
+				      <li class="" role="presentation" title="Count score">Count score</li>
+				      <li class="" role="presentation" title="Permanent link">Permanent link</li>
+				      </ul>
+				      </div>
+
+					<div class="ctrlgroup ctrlgroup-right"><a class="btn btn-default" title="About"><span
+						class="glyphicon glyphicon-question-sign" aria-hidden="true"></a></div>
+
+					<div>
+					<a class="btn btn-default" ng-click="Player.first()"
+						aria-label="start"><span
+						class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span></a>
+					<a class="btn btn-default" ng-click="Player.previous()"
+						aria-label="previous"><span
+						class="glyphicon glyphicon-step-backward" aria-hidden="true"></span></a>
+						
+					<form class="player-mn"><input type="text" move-number class="player-mn-value" ng-model="Game.path.move"></input></form>
+					
+					<a class="btn btn-default" ng-click="Player.next()"
+						aria-label="next"><span
+						class="glyphicon glyphicon-step-forward" aria-hidden="true"></span></a>
+
+					<a class="btn btn-default" ng-click="Player.last()"
+						aria-label="end"><span
+						class="glyphicon glyphicon-fast-forward" aria-hidden="true"></span></a>
+					</div>
+				</div>
+				
+				<player mode="replay" variation_markup="true" variation_children="true"> <board coordinates="true"></board> </player>
+				
+				<div>Move number: {{Game.path}} </div>
+				<div><button ng-click="Player.setVariationMarkup(!Player.variationMarkup)">Toggle variation markup</button>
+					<button ng-click="Player.board.toggleCoordinates()">Toggle coordinates</button>
+							<p>
+			Player mode:<br/>
+			<button ng-repeat="(mode, modeClass) in Player.modes" ng-click="Player.switchMode(mode)" ng-disabled="Player.mode == mode">{{mode}}</button>
+		</p>
+
+		<p>
+			Player tool:<br/>
+			<button ng-repeat="tool in Player.tools" ng-click="Player.switchTool(tool)" ng-disabled="Player.tool == tool">{{tool}}</button>
+		</p>
+
+		<p ng-show="Player.tool == 'setup'">
+			Setup tool:<br/>
+			<button ng-repeat="tool in SetupTools" ng-click="Player.switchSetupTool(tool)" ng-disabled="Player.setupTool == tool">{{tool}}</button>
+		</p>
+
+		<p ng-show="Player.tool == 'markup'">
+			Markup tool:<br/>
+			<button ng-repeat="tool in MarkupTools" ng-click="Player.switchMarkupTool(tool)" ng-disabled="Player.markupTool == tool">{{tool}}</button>
+		</p>
+
+		<p>
+			Options:<br/>
+			<button ng-click="Player.board.swapColors()">Swap colors</button>
+			<button ng-click="Player.board.toggleCoordinates()">Toggle coordinates</button>
+			<button ng-click="Player.setVariationMarkup(!Player.variationMarkup)">Toggle variation markup</button>
+		</p/>
+					</div>
+				<div>{{Game.node.comments}}</div>
+			</div>
+
+
+
+		</div>
+
+		<!--  
+			<form id="info" name="gameInfo" ng-controller="GameInfoCtrl">
+				<div class="property">
+					<span class="sgf-label">White</span>
+						<input type="text" class="form-control input" ng-model='doc.info.properties["PW"]' ng-blur="saveInfo($event)"
+					aria-describedby="addon-result"></input>
+						<input type="text" class="form-control input" ng-model='doc.info.properties["WR"]' ng-blur="saveInfo($event)"
+					aria-describedby="addon-result"></input>
+				</div>
+				<div class="property">
+					<span class="sgf-label">Black</span>
+						<input type="text" class="form-control input" ng-model='doc.info.properties["PB"]' ng-blur="saveInfo($event)"
+					aria-describedby="addon-result"></input>
+						<input type="text" class="form-control input" ng-model='doc.info.properties["BR"]' ng-blur="saveInfo($event)"
+					aria-describedby="addon-result"></input>
+				</div>
+				<div class="property">
+					<span class="sgf-label">Date</span>
+					<input type="text" class="form-control input" ng-model='doc.info.properties["DT"]' ng-blur="saveInfo($event)"
+					aria-describedby="addon-result"></input>
+				</div>
+				<div class="property">
+					<span class="sgf-label" id="addon-result">Result</span>
+					<input result type="text" class="form-control input" ng-model='doc.info.properties["RE"]' ng-blur="saveInfo($event)"
+					aria-describedby="addon-result"></input>
+				</div>
+				<div class="property comment">
+					<span class="sgf-label" id="addon-comment">Comment</span> 
+					<textarea class="form-control input" ng-model='doc.node.properties["C"]' ng-blur="save()"
+					aria-describedby="addon-comment"></textarea>
+				</div>
+			</form>
+-->
+	</div>
+
+</div>
+
+
+
+	<div class="modal hide" id="rename-dialog" ng-controller="RenameCtrl">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal">×</button>
+		<h3>Rename File</h3>
+	</div>
+	<div class="modal-body">
+		<form>
+			<label>Enter a new file name:</label> <input type="text"
+				ng-model="newFileName" autofocus required />
+		</form>
+	</div>
+	<div class="modal-footer">
+		<a href class="btn" data-dismiss="modal">Cancel</a> <a href
+			ng-click="save()" class="btn btn-primary">Save</a>
+	</div>
+</div>
