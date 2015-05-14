@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>liberty-GoDrive</name>
+	<name>GoDrive</name>
 	<comment></comment>
 	<projects>
+		<project>WebSphere Application Server Liberty Profile</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

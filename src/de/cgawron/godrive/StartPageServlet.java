@@ -74,7 +74,7 @@ public class StartPageServlet extends GoDriveServlet {
 				return;
 			}
 		}
-		req.getRequestDispatcher("/public/index.html").forward(req, resp);
+		req.getRequestDispatcher("/index.html").forward(req, resp);
 	}
 
 }

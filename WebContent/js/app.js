@@ -8,8 +8,6 @@ var EditorState = {
 	READONLY : 4
 };
 
-google.load('picker', '1');
-
 angular.module('app', ['ngRoute', 'app.filters', 'app.services', 'app.directives', 'ngGo.Board.Service', 'ngGo.Player.Service', 'ngGo.Player.Mode.Edit.Service',
                		'ngGo.Player.Mode.Replay.Service' ])
 .constant('saveInterval', 15000)
@@ -58,3 +56,5 @@ angular.module('app', ['ngRoute', 'app.filters', 'app.services', 'app.directives
 								redirectTo : '/view/'
 							});
 		} );
+
+google.load('picker', '1');
