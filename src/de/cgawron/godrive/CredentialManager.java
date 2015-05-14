@@ -2,8 +2,10 @@ package de.cgawron.godrive;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.CredentialStore;
@@ -22,7 +24,8 @@ import com.google.api.client.json.JsonFactory;
  * @author jbd@google.com (Burcu Dogan)
  */
 public class CredentialManager {
-
+	static private Logger log = Logger.getLogger(CredentialManager.class
+			.getName());
 	/**
 	 * Client secrets object.
 	 */
@@ -70,8 +73,8 @@ public class CredentialManager {
 		this.clientSecrets = clientSecrets;
 		this.transport = transport;
 		this.jsonFactory = factory;
-		CredentialManager.credentialStore = (CredentialStore) new FileCredentialStoreJava7(new File("/tmp/credentials"),
-				jsonFactory);
+		CredentialManager.credentialStore = new FileCredentialStoreJava7(
+				new File("/tmp/credentials"), jsonFactory);
 	}
 
 	/**
@@ -81,10 +84,8 @@ public class CredentialManager {
 	 */
 	public Credential buildEmpty() {
 		return new GoogleCredential.Builder()
-				.setClientSecrets(this.clientSecrets)
-				.setTransport(transport)
-				.setJsonFactory(jsonFactory)
-				.build();
+				.setClientSecrets(this.clientSecrets).setTransport(transport)
+				.setJsonFactory(jsonFactory).build();
 	}
 
 	/**
@@ -101,6 +102,13 @@ public class CredentialManager {
 			return credential;
 		}
 		return null;
+	}
+
+	public void setRedirectUri(String redirectUri) {
+		log.info("Setting redirectUri to " + redirectUri);
+		List<String> redirectUris = new ArrayList<String>();
+		redirectUris.add(redirectUri);
+		clientSecrets.getDetails().setRedirectUris(redirectUris);
 	}
 
 	/**
@@ -151,15 +159,14 @@ public class CredentialManager {
 	public Credential retrieve(String code) {
 		try {
 			GoogleTokenResponse response = new GoogleAuthorizationCodeTokenRequest(
-					transport,
-					jsonFactory,
-					clientSecrets.getWeb().getClientId(),
-					clientSecrets.getWeb().getClientSecret(),
-					code,
-					clientSecrets.getWeb().getRedirectUris().get(0)).execute();
+					transport, jsonFactory, clientSecrets.getWeb()
+							.getClientId(), clientSecrets.getWeb()
+							.getClientSecret(), code, clientSecrets.getWeb()
+							.getRedirectUris().get(0)).execute();
 			return buildEmpty().setAccessToken(response.getAccessToken());
 		} catch (IOException e) {
-			new RuntimeException("An unknown problem occured while retrieving token", e);
+			new RuntimeException(
+					"An unknown problem occured while retrieving token", e);
 		}
 		return null;
 	}

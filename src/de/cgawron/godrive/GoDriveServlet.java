@@ -86,8 +86,8 @@ public abstract class GoDriveServlet extends HttpServlet {
 		super.init();
 		// init credential manager
 		try {
-			credentialManager = new CredentialManager(
-					getClientSecrets(), TRANSPORT, JSON_FACTORY);
+			credentialManager = new CredentialManager(getClientSecrets(),
+					TRANSPORT, JSON_FACTORY);
 		} catch (IOException e) {
 			throw new RuntimeException("failed to create CredentialManager", e);
 		}
@@ -165,14 +165,19 @@ public abstract class GoDriveServlet extends HttpServlet {
 	 *            Response object.
 	 * @throws IOException
 	 */
-	protected boolean loginIfRequired(HttpServletRequest req, HttpServletResponse resp,
-			String stateParam)
-			throws IOException {
+	protected boolean loginIfRequired(HttpServletRequest req,
+			HttpServletResponse resp, String stateParam) throws IOException {
 		Credential credential = getCredential(req, resp);
 		if (credential == null) {
 			// redirect to authorization url
 			try {
 				req.getSession().setAttribute(KEY_STATE_PARAM, stateParam);
+				StringBuffer uri = new StringBuffer();
+				uri.append(req.getScheme()).append("://")
+						.append(req.getServerName()).append(":")
+						.append(req.getServerPort())
+						.append(req.getContextPath());
+				credentialManager.setRedirectUri(uri.toString());
 				resp.sendRedirect(credentialManager.getAuthorizationUrl());
 				return true;
 			} catch (IOException e) {
@@ -198,6 +203,11 @@ public abstract class GoDriveServlet extends HttpServlet {
 		String stateParam = null;
 		if (code != null) {
 			// retrieve new credentials with code
+			StringBuffer uri = new StringBuffer();
+			uri.append(req.getScheme()).append("://")
+					.append(req.getServerName()).append(":")
+					.append(req.getServerPort()).append(req.getContextPath());
+			credentialManager.setRedirectUri(uri.toString());
 			Credential credential = credentialManager.retrieve(code);
 			// request userinfo
 			Oauth2 service = getOauth2Service(credential);
@@ -206,10 +216,11 @@ public abstract class GoDriveServlet extends HttpServlet {
 				String id = about.getId();
 				credentialManager.save(id, credential);
 				req.getSession().setAttribute(KEY_SESSION_USERID, id);
-				stateParam = (String) req.getSession().getAttribute(KEY_STATE_PARAM);
+				stateParam = (String) req.getSession().getAttribute(
+						KEY_STATE_PARAM);
 			} catch (IOException e) {
-				throw new RuntimeException("Can't handle the OAuth2 callback, " +
-						"make sure that code is valid.");
+				throw new RuntimeException("Can't handle the OAuth2 callback, "
+						+ "make sure that code is valid.");
 			}
 			String targetUrl = req.getContextPath();
 			if (stateParam != null) {
@@ -234,8 +245,14 @@ public abstract class GoDriveServlet extends HttpServlet {
 	 */
 	protected Credential getCredential(HttpServletRequest req,
 			HttpServletResponse resp) throws IOException {
-		String userId = (String) req.getSession().getAttribute(KEY_SESSION_USERID);
+		String userId = (String) req.getSession().getAttribute(
+				KEY_SESSION_USERID);
 		if (userId != null) {
+			StringBuffer uri = new StringBuffer();
+			uri.append(req.getScheme()).append("://")
+					.append(req.getServerName()).append(":")
+					.append(req.getServerPort()).append(req.getContextPath());
+			credentialManager.setRedirectUri(uri.toString());
 			return credentialManager.get(userId);
 		}
 		return null;
@@ -253,7 +270,8 @@ public abstract class GoDriveServlet extends HttpServlet {
 	 */
 	protected void deleteCredential(HttpServletRequest req,
 			HttpServletResponse resp) throws IOException {
-		String userId = (String) req.getSession().getAttribute(KEY_SESSION_USERID);
+		String userId = (String) req.getSession().getAttribute(
+				KEY_SESSION_USERID);
 		if (userId != null) {
 			credentialManager.delete(userId);
 			req.getSession().removeAttribute(KEY_SESSION_USERID);
@@ -270,8 +288,8 @@ public abstract class GoDriveServlet extends HttpServlet {
 	 *         there was a problem.
 	 */
 	protected Drive getDriveService(Credential credential) {
-		return new Drive.Builder(TRANSPORT, JSON_FACTORY, credential).setApplicationName(
-				APPLICATION_NAME).build();
+		return new Drive.Builder(TRANSPORT, JSON_FACTORY, credential)
+				.setApplicationName(APPLICATION_NAME).build();
 	}
 
 	/**
@@ -284,8 +302,11 @@ public abstract class GoDriveServlet extends HttpServlet {
 	 *         there was a problem.
 	 */
 	protected Oauth2 getOauth2Service(Credential credential) {
-		return new Oauth2.Builder(TRANSPORT, JSON_FACTORY, credential).build();
+		return new Oauth2.Builder(TRANSPORT, JSON_FACTORY, credential)
+				.setApplicationName(APPLICATION_NAME).build();
 	}
+
+	static GoogleClientSecrets secrets = null;
 
 	/**
 	 * Reads client_secrets.json and creates a GoogleClientSecrets object.
@@ -293,13 +314,16 @@ public abstract class GoDriveServlet extends HttpServlet {
 	 * @return A GoogleClientsSecrets object.
 	 */
 	private GoogleClientSecrets getClientSecrets() {
-		// TODO: do not read on each request
-		InputStream stream =
-				getServletContext().getResourceAsStream(CLIENT_SECRETS_FILE_PATH);
-		try {
-			return GoogleClientSecrets.load(JSON_FACTORY, stream);
-		} catch (IOException e) {
-			throw new RuntimeException("No client_secrets.json found");
+		if (secrets == null) {
+			// TODO: do not read on each request
+			InputStream stream = getServletContext().getResourceAsStream(
+					CLIENT_SECRETS_FILE_PATH);
+			try {
+				secrets = GoogleClientSecrets.load(JSON_FACTORY, stream);
+			} catch (IOException e) {
+				throw new RuntimeException("No client_secrets.json found");
+			}
 		}
+		return secrets;
 	}
 }
