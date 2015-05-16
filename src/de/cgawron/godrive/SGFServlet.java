@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Scanner;
 
+import javax.ejb.EJB;
 //import javax.ejb.EJB;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +41,7 @@ import de.cgawron.go.sgf.GameTree;
 import de.cgawron.go.sgf.Node;
 import de.cgawron.go.sgf.Property;
 import de.cgawron.go.sgf.Property.Key;
+import de.cgawron.godrive.model.ClientFile;
 import de.cgawron.godrive.model.GameInfo;
 import de.cgawron.godrive.model.NodeInfo;
 
@@ -59,7 +61,7 @@ public class SGFServlet extends GoDriveServlet {
 	private static final String TEST_SGF = "/WEB-INF/test.sgf";
 	private static final String KEY_SGF_TREE = "SGF_TREE";
 
-	//@EJB
+	@EJB
 	private UpdateService updateService;
 
 	/**
@@ -76,48 +78,6 @@ public class SGFServlet extends GoDriveServlet {
 		if (fileId == null) {
 			sendError(resp, 400, "The `file_id` URI parameter must be specified.");
 			return;
-		}
-
-		GameTree gameTree = null;
-		gameTree = (GameTree) req.getSession().getAttribute(KEY_SGF_TREE + fileId);
-		if (gameTree == null) {
-			File file = null;
-			try {
-				file = service.files().get(fileId).execute();
-			} catch (GoogleJsonResponseException e) {
-				if (e.getStatusCode() == 401) {
-					// The user has revoked our token or it is otherwise bad.
-					// Delete the local copy so that their next page load will
-					// recover.
-					deleteCredential(req, resp);
-					sendGoogleJsonResponseError(resp, e);
-					return;
-				}
-				else {
-					sendError(resp, 404, "File not found");
-					return;
-				}
-			}
-
-			if (file != null) {
-				String content = downloadFileContent(service, file);
-				if (content == null || content.length() == 0) {
-					logger.info("Empty file!");
-					gameTree = new GameTree();
-				}
-
-				try {
-					logger.info("Content: " + content);
-					gameTree = new GameTree(new StringReader(content));
-				} catch (Exception e) {
-					throw new RuntimeException("failed to parse SGF", e);
-				}
-				req.getSession().setAttribute(KEY_SGF_TREE + fileId, gameTree);
-			}
-
-		}
-		else {
-			logger.info("used cached GameTree");
 		}
 
 		logger.info("path: " + req.getRequestURI());
@@ -146,20 +106,12 @@ public class SGFServlet extends GoDriveServlet {
 				}
 
 				String content = downloadFileContent(service, file);
-				resp.getOutputStream().print(content);
+				sendJson(resp, new ClientFile(file, content));
 			} catch (Exception e) {
 				logger.log(Level.SEVERE, "failed to save gameTree", e);
 				sendError(resp, 500, e.getLocalizedMessage());
 			}
 		}
-		else if (req.getRequestURI().endsWith("info")) {
-			sendJson(resp, new GameInfo(fileId, gameTree.getRoot()));
-		}
-		else {
-			int id = Integer.parseInt(req.getParameter("id"));
-			sendJson(resp, new NodeInfo(gameTree.getNode(id)));
-		}
-
 	}
 
 	/**
@@ -239,7 +191,7 @@ public class SGFServlet extends GoDriveServlet {
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			GameTree gameTree = new GameTree();
 			gameTree.getRoot().put(new Property.SimpleText(Property.APPLICATION,
-					"SGF Editor (https://blechtrottel.cgawron.de/GoDrive)"));
+					"SGF Editor (https://godrive.cgawron.de/)"));
 			gameTree.save(stream);
 			String sgfContent = stream.toString();
 
@@ -253,7 +205,7 @@ public class SGFServlet extends GoDriveServlet {
 					.execute();
 
 			req.getSession().setAttribute(KEY_SGF_TREE + file.getId(), gameTree);
-			sendJson(resp, new GameInfo(file.getId(), gameTree.getRoot()));
+			sendJson(resp, new ClientFile(file, sgfContent));
 		}
 		else {
 			Point point = new Point(req.getParameter("point"));

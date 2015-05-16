@@ -34,11 +34,12 @@ module.factory('viewer',
 	                // viewer = ace.edit(element);
 	            },
 	            snapshot:function () {
+	            	$log.info("snapshot: ", Player, Player.game);
 	                doc.dirty = false;
 	                var data = angular.extend({}, doc.info);
 	                data.resource_id = doc.resource_id;
 	                if (doc.info.editable) {
-	                    // data.content = viewer.getSession().getValue();
+	                    data.content = Player.game.toSgf();
 	                }
 	                return data;
 	            },
@@ -71,19 +72,13 @@ module.factory('viewer',
 	                if (!reload && doc.info && fileId == doc.resource_id) {
 	                    return $q.when(doc.info);
 	                }
+	                doc.resource_id = fileId;
 	                this.loading = true;
 	                return backend.load(fileId).then(angular.bind(this,
 	                    function (result) {
 	                        this.loading = false;
-	                        var jgf = KifuParser.sgf2jgf(result.data);
-	            			if (!jgf) {
-	            				$rootScope.$broadcast('error', {
-		                            action:'load',
-		                            message:"Invalid SGF"
-		                        });
-	            				return false;
-	            			}
-	                        Player.load(jgf);
+	                        $log.info("Loading resource: result=", result);
+	                        this.updateViewer(result.data);
 	                        $rootScope.$broadcast('loaded', doc.info);
 	                        return result;
 	                    }), angular.bind(this,
@@ -104,6 +99,7 @@ module.factory('viewer',
 	                }
 	                this.saving = true;
 	                var file = this.snapshot();
+	                $log.info("snapshot=", file);
 
 	                // Force revision if first save of the session
 	                newRevision = newRevision || doc.timeSinceLastSave() > ONE_HOUR_IN_MS;
@@ -131,15 +127,16 @@ module.factory('viewer',
 	            updateViewer:function (fileInfo) {
 	                $log.info("Updating viewer", fileInfo);
 	                doc.info = fileInfo;
-	                doc.resource_id = fileInfo.fileId;
-	                backend.node(doc.resource_id, doc.info.rootId).then(angular.bind(this,
-		                    function (result) {
-		                        this.updateNode(result.data);
-		                        return result;
-		                    }));
-	                //viewer.setSession(session);
-	                //viewer.setReadOnly(!doc.info.editable);
-	                //viewer.focus();
+	                doc.resource_id = fileInfo.resource_id;
+	                var jgf = KifuParser.sgf2jgf(fileInfo.content);
+        			if (!jgf) {
+        				$rootScope.$broadcast('error', {
+                            action:'load',
+                            message:"Invalid SGF"
+                        });
+        			}
+                    Player.load(jgf);
+                    $rootScope.$broadcast('loaded', doc.info);
 	            },
 	            getStone:function (id) {
 	                $log.info("getStone ", id);

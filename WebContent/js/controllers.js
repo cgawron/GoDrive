@@ -102,7 +102,7 @@ function ShareCtrl($scope, appId, doc) {
      */
 }
 
-function MenuCtrl($scope, $location, appId) {
+function MenuCtrl($scope, $location, viewer, appId) {
     var onFilePicked = function (data) {
         $scope.$apply(function () {
             if (data.action == 'picked') {
@@ -125,11 +125,9 @@ function MenuCtrl($scope, $location, appId) {
             .build();
         picker.setVisible(true);
     };
-    $scope.create = function () {
-        this.viewer.create();
-    };
+
     $scope.save = function () {
-        this.viewer.save(true);
+        viewer.save(true);
     }
 }
 

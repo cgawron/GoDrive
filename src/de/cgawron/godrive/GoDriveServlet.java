@@ -16,6 +16,7 @@ package de.cgawron.godrive;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -43,6 +44,8 @@ import com.google.gson.Gson;
  */
 @SuppressWarnings("serial")
 public abstract class GoDriveServlet extends HttpServlet {
+	private static Logger log = Logger.getLogger(GoDriveServlet.class.getName());
+	
 	public static final String APPLICATION_NAME = "SGF Editor";
 
 	/**
@@ -165,8 +168,7 @@ public abstract class GoDriveServlet extends HttpServlet {
 	 *            Response object.
 	 * @throws IOException
 	 */
-	protected boolean loginIfRequired(HttpServletRequest req,
-			HttpServletResponse resp, String stateParam) throws IOException {
+	protected boolean loginIfRequired(HttpServletRequest req, HttpServletResponse resp, String stateParam) throws IOException {
 		Credential credential = getCredential(req, resp);
 		if (credential == null) {
 			// redirect to authorization url
@@ -243,11 +245,11 @@ public abstract class GoDriveServlet extends HttpServlet {
 	 * @return Credential object of the user in session or null.
 	 * @throws IOException
 	 */
-	protected Credential getCredential(HttpServletRequest req,
-			HttpServletResponse resp) throws IOException {
+	protected Credential getCredential(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		String userId = (String) req.getSession().getAttribute(
 				KEY_SESSION_USERID);
 		if (userId != null) {
+			log.info("getCredential: userId=" + userId);
 			StringBuffer uri = new StringBuffer();
 			uri.append(req.getScheme()).append("://")
 					.append(req.getServerName()).append(":")
@@ -255,6 +257,7 @@ public abstract class GoDriveServlet extends HttpServlet {
 			credentialManager.setRedirectUri(uri.toString());
 			return credentialManager.get(userId);
 		}
+		log.info("getCredential: returning null");
 		return null;
 	}
 
@@ -288,8 +291,7 @@ public abstract class GoDriveServlet extends HttpServlet {
 	 *         there was a problem.
 	 */
 	protected Drive getDriveService(Credential credential) {
-		return new Drive.Builder(TRANSPORT, JSON_FACTORY, credential)
-				.setApplicationName(APPLICATION_NAME).build();
+		return new Drive.Builder(TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
 	}
 
 	/**
@@ -302,8 +304,7 @@ public abstract class GoDriveServlet extends HttpServlet {
 	 *         there was a problem.
 	 */
 	protected Oauth2 getOauth2Service(Credential credential) {
-		return new Oauth2.Builder(TRANSPORT, JSON_FACTORY, credential)
-				.setApplicationName(APPLICATION_NAME).build();
+		return new Oauth2.Builder(TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
 	}
 
 	static GoogleClientSecrets secrets = null;

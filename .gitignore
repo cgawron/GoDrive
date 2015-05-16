@@ -1,2 +1,3 @@
 /webStarterApp.war
 /bin/**
+/.apt_generated/

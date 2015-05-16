@@ -8105,7 +8105,7 @@ angular.module('ngGo.Kifu.Parsers.Jgf2Sgf.Service', [
 				}
 
 				//Other object, can't handle it
-				if (typeof props[key] == 'object') {
+				if (typeof props == 'undefined' || typeof props[key] == 'object') {
 					continue;
 				}
 
