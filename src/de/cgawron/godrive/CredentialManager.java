@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.CredentialStore;
 import com.google.api.client.extensions.java7.auth.oauth2.FileCredentialStoreJava7;
@@ -104,13 +106,6 @@ public class CredentialManager {
 		return null;
 	}
 
-	public void setRedirectUri(String redirectUri) {
-		log.info("Setting redirectUri to " + redirectUri);
-		List<String> redirectUris = new ArrayList<String>();
-		redirectUris.add(redirectUri);
-		clientSecrets.getDetails().setRedirectUris(redirectUris);
-	}
-
 	/**
 	 * Saves credentials of the given user.
 	 * 
@@ -169,5 +164,23 @@ public class CredentialManager {
 					"An unknown problem occured while retrieving token", e);
 		}
 		return null;
+	}
+
+	public void setRedirectUri(String redirectUri) {
+		log.info("Setting redirectUri to " + redirectUri);
+		List<String> redirectUris = new ArrayList<String>();
+		redirectUris.add(redirectUri);
+		clientSecrets.getDetails().setRedirectUris(redirectUris);
+	}
+	
+	public void setRedirectUri(HttpServletRequest req) {
+		StringBuffer uri = new StringBuffer();
+		uri.append(req.getScheme()).append("://")
+				.append(req.getServerName());
+		if (req.getServerPort() != 80) {
+			uri.append(":").append(req.getServerPort());
+		}
+		uri.append(req.getContextPath());
+		setRedirectUri(uri.toString());
 	}
 }

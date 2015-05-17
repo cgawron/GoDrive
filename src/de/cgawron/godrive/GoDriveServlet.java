@@ -174,12 +174,7 @@ public abstract class GoDriveServlet extends HttpServlet {
 			// redirect to authorization url
 			try {
 				req.getSession().setAttribute(KEY_STATE_PARAM, stateParam);
-				StringBuffer uri = new StringBuffer();
-				uri.append(req.getScheme()).append("://")
-						.append(req.getServerName()).append(":")
-						.append(req.getServerPort())
-						.append(req.getContextPath());
-				credentialManager.setRedirectUri(uri.toString());
+				credentialManager.setRedirectUri(req);
 				resp.sendRedirect(credentialManager.getAuthorizationUrl());
 				return true;
 			} catch (IOException e) {
@@ -204,12 +199,7 @@ public abstract class GoDriveServlet extends HttpServlet {
 		String code = req.getParameter("code");
 		String stateParam = null;
 		if (code != null) {
-			// retrieve new credentials with code
-			StringBuffer uri = new StringBuffer();
-			uri.append(req.getScheme()).append("://")
-					.append(req.getServerName()).append(":")
-					.append(req.getServerPort()).append(req.getContextPath());
-			credentialManager.setRedirectUri(uri.toString());
+			credentialManager.setRedirectUri(req);
 			Credential credential = credentialManager.retrieve(code);
 			// request userinfo
 			Oauth2 service = getOauth2Service(credential);
@@ -250,11 +240,7 @@ public abstract class GoDriveServlet extends HttpServlet {
 				KEY_SESSION_USERID);
 		if (userId != null) {
 			log.info("getCredential: userId=" + userId);
-			StringBuffer uri = new StringBuffer();
-			uri.append(req.getScheme()).append("://")
-					.append(req.getServerName()).append(":")
-					.append(req.getServerPort()).append(req.getContextPath());
-			credentialManager.setRedirectUri(uri.toString());
+			credentialManager.setRedirectUri(req);
 			return credentialManager.get(userId);
 		}
 		log.info("getCredential: returning null");
