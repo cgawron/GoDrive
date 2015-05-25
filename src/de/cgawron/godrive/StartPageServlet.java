@@ -50,28 +50,26 @@ public class StartPageServlet extends GoDriveServlet {
 		if (queryString != null) {
 			reqUrl.append("?").append(queryString);
 		}
-		logger.info("StartPageServlet: " + reqUrl);
+		logger.info("StartPageServlet: " + reqUrl + " " + req.getPathInfo() + " " + req.getRequestURI());
 
 		// handle OAuth2 callback
-		if (handleCallbackIfRequired(req, resp))
+		if (handleCallbackIfRequired(req, resp)) {
+			logger.info("handle callback");
 			return;
-
-		String stateParam = req.getParameter("state");
+		}
 
 		// Making sure that we have user credentials
-		if (loginIfRequired(req, resp, stateParam))
+		if (loginIfRequired(req, resp, req.getPathInfo())) {
+			logger.info("logging in");
 			return;
-
-		if (stateParam != null) {
-			State state = new State(stateParam);
-			if (state.ids != null && state.ids.size() > 0) {
-				resp.sendRedirect("#/view/" + state.ids.toArray()[0]);
-				return;
-			} else if (state.folderId != null) {
-				resp.sendRedirect("#/create/" + state.folderId);
-				return;
-			}
 		}
+
+		/*
+		if (req.getPathInfo() != null && req.getPathInfo().length() > 1) {
+			resp.sendRedirect("view" + req.getPathInfo());
+			return;
+		}
+		*/
 		req.getRequestDispatcher("/index.html").forward(req, resp);
 	}
 

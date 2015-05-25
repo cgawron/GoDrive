@@ -52,4 +52,9 @@
     <servlet-name>SGFServlet</servlet-name>
     <url-pattern>/sgf/node/*</url-pattern>
   </servlet-mapping>
+    <servlet-mapping>
+    	<servlet-name>StartPageServlet</servlet-name>
+    	<url-pattern>
+    	/view/*</url-pattern>
+    </servlet-mapping>
 </web-app>

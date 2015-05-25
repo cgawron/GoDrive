@@ -74,7 +74,7 @@ public abstract class GoDriveServlet extends HttpServlet {
 	 */
 	public static final String CLIENT_SECRETS_FILE_PATH = "/WEB-INF/client_secrets.json";
 
-	private static final String KEY_STATE_PARAM = "state";
+	private static final String KEY_STATE_PARAM = "file_id";
 
 	/**
 	 * A credential manager to get, set, delete credential objects.
@@ -215,8 +215,9 @@ public abstract class GoDriveServlet extends HttpServlet {
 						+ "make sure that code is valid.");
 			}
 			String targetUrl = req.getContextPath();
+			log.info("handleCallback: stateParam=" + stateParam);
 			if (stateParam != null) {
-				targetUrl = targetUrl + "?state=" + stateParam;
+				targetUrl = targetUrl + "/view" + stateParam;
 			}
 			resp.sendRedirect(targetUrl);
 			return true;

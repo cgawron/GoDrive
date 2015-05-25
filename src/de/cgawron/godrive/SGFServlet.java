@@ -73,15 +73,16 @@ public class SGFServlet extends GoDriveServlet {
 			throws IOException {
 
 		String fileId = req.getParameter("file_id");
+		logger.info("path: " + req.getRequestURI());
+		logger.info("query: " + req.getQueryString());
+		logger.info("file_id: " + fileId);
 		Drive service = getDriveService(getCredential(req, resp));
-
+		
 		if (fileId == null) {
 			sendError(resp, 400, "The `file_id` URI parameter must be specified.");
 			return;
 		}
 
-		logger.info("path: " + req.getRequestURI());
-		logger.info("query: " + req.getQueryString());
 		if (req.getRequestURI().endsWith("sgf")) {
 			try {
 				resp.setContentType("application/x-go-sgf");

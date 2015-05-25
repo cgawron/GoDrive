@@ -70,8 +70,8 @@ function NavCtrl($scope, backend) {
     };
 }
 
-function PlayCtrl($scope, $location, $routeParams, $timeout, viewer, doc) {
-    console.log($routeParams);
+function PlayCtrl($scope, $location, $routeParams, $timeout, $log, viewer, doc) {
+    $log.info("PlayCtrl: routeParams=", $routeParams);
     $scope.viewer = viewer;
     $scope.doc = doc;
     $scope.$on('saved',

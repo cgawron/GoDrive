@@ -5391,6 +5391,11 @@ angular.module('ngGo.Game.Service', [
 			//Color defaults to current turn
 			color = color || this.position.getTurn();
 
+			//Prevent playing an existing variation
+			if (this.node.isMoveVariation(x, y)) {
+				return -1;	
+			}
+			
 			//Validate move and get new position
 			var newPosition = this.validateMove(x, y, color);
 
@@ -5405,9 +5410,9 @@ angular.module('ngGo.Game.Service', [
 					color: color
 				}
 			});
-
+					
 			//Append it to the current node, remember the path, and change the pointer
-			var i = node.appendTo(this.node);
+			i = node.appendTo(this.node);
 			this.node._remembered_path = i;
 			this.node = node;
 
@@ -8105,7 +8110,7 @@ angular.module('ngGo.Kifu.Parsers.Jgf2Sgf.Service', [
 				}
 
 				//Other object, can't handle it
-				if (typeof props == 'undefined' || typeof props[key] == 'object') {
+				if (typeof props[key] == 'object') {
 					continue;
 				}
 

@@ -14,7 +14,7 @@ angular.module('app', ['ngRoute', 'app.filters', 'app.services', 'app.directives
 .constant('appId', '140682578204-8516fe1dt9e7lquhm5v5j39cvpie02kh.apps.googleusercontent.com')
 .config(
 //		['$routeProvider',
-		 function($routeProvider, PlayerProvider, BoardProvider,
+		 function($routeProvider, $locationProvider, PlayerProvider, BoardProvider,
 				 BoardThemeProvider) {
 
 			// Player configuration
@@ -40,6 +40,8 @@ angular.module('app', ['ngRoute', 'app.filters', 'app.services', 'app.directives
 				}
 			});
 
+			$locationProvider.html5Mode(true);
+			
 			$routeProvider
 			.when(
 					'/view/',
@@ -52,9 +54,9 @@ angular.module('app', ['ngRoute', 'app.filters', 'app.services', 'app.directives
 							{
 								templateUrl : 'partials/viewer.html',
 								controller : PlayCtrl
-							}).otherwise({
+							})/*.otherwise({
 								redirectTo : '/view/'
-							});
+							})*/;
 		} );
 
 google.load('picker', '1');
